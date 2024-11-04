@@ -1,10 +1,14 @@
+
+
 document.addEventListener("DOMContentLoaded", function () {
     const statusElement = document.getElementById("status");
     const checkUrlButton = document.getElementById("checkUrlButton");
+    const loadingBar = document.getElementById("loadingBar");
 
     // Set the status to "Ready" when the popup is opened
     statusElement.textContent = "Ready";
     statusElement.style.color = "black";
+    loadingBar.style.display = "none"; // Hide loading bar initially
 
     // Clear the stored URL status when the popup is opened
     chrome.storage.local.remove("urlStatus");
@@ -13,14 +17,16 @@ document.addEventListener("DOMContentLoaded", function () {
     chrome.storage.onChanged.addListener((changes, areaName) => {
         if (areaName === "local" && changes.urlStatus) {
             updateStatusDisplay(changes.urlStatus.newValue);
+            loadingBar.style.display = "none"; // Hide loading bar when result is displayed
         }
     });
 
     // Attach a click event to the button to fetch the URL status when clicked
     checkUrlButton.addEventListener("click", () => {
-        // Display "Checking..." only when the button is clicked
+        // Display "Checking..." and show loading bar only when button is clicked
         statusElement.textContent = "Checking...";
         statusElement.style.color = "black";
+        loadingBar.style.display = "block"; // Show loading bar
 
         chrome.tabs.query({ active: true, currentWindow: true }, (tabs) => {
             const activeTab = tabs[0];
@@ -31,6 +37,7 @@ document.addEventListener("DOMContentLoaded", function () {
                 console.warn("No active URL found to check.");
                 statusElement.textContent = "No active URL found.";
                 statusElement.style.color = "black";
+                loadingBar.style.display = "none"; // Hide loading bar if no URL found
             }
         });
     });
